@@ -1,4 +1,4 @@
-﻿Console.WriteLine("=== Day 2, Puzzle 1 ===");
+﻿Console.WriteLine("=== Day 2 ===");
 
 var games = File.ReadAllLines("input.txt")
 	.Select(Parser.ParseGame)
