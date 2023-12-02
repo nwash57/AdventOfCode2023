@@ -13,8 +13,19 @@ var validGames = games
 
 var idSum = validGames.Sum(g => g.Id);
 
-Console.WriteLine("Sum of valid game IDs: " + idSum);
+Console.WriteLine("(Puzzle 1) Sum of valid game IDs: " + idSum);
 
+var minSets = games
+	.Select(
+		g => new Set(
+			g.Sets.Select(s => s.Blue).Max(),
+			g.Sets.Select(s => s.Green).Max(),
+			g.Sets.Select(s => s.Red).Max()));
+
+var powers = minSets.Select(set => set.Blue * set.Green * set.Red);
+var minPowerSum = powers.Sum();
+
+Console.WriteLine("(Puzzle 2) Sum of minimum powers: " + minPowerSum);
 
 public record Set(int Blue = 0, int Green = 0, int Red = 0);
 public record Game(int Id, Set[] Sets);
