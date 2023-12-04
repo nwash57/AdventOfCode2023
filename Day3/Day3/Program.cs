@@ -5,16 +5,27 @@ Console.WriteLine("=== Puzzle 1 ===");
 
 var schematic = Parser.ParseSchematic("input.txt");
 
-var allSymbols = schematic.Lines
-	.SelectMany(l => l.Symbols);
-
 var partNumbers = schematic.Lines
 	.SelectMany((line, lineNum) => line.Numbers
 		.Where(n => n.HasAdjacentSymbol(lineNum, ref schematic)))
 	.ToArray();
 
 var sumOfPartNumbers = partNumbers.Sum(n => n.Value);
-Console.WriteLine("Sum of part numbers: {0}", sumOfPartNumbers);
+Console.WriteLine("(Puzzle 1) Sum of part numbers: {0}", sumOfPartNumbers);
+
+var gearRatios = schematic.Lines
+	.Select((line, lineNum) => line.Symbols
+		.Where(s => s.IsGearRatio(lineNum, ref schematic))
+		.Select(s => s.GetAdjacentNumbers(lineNum, ref schematic))
+		.ToArray())
+	.SelectMany(ratios => ratios)
+	.ToArray();
+
+var sumOfGearRatios = gearRatios
+	.Select(ratio => ratio[0].Value * ratio[1].Value)
+	.Sum();
+
+Console.WriteLine("(Puzzle 2) Sum of gear ratios: " + sumOfGearRatios);
 
 public class Number(int value, int position)
 {
@@ -98,14 +109,26 @@ public static class Parser
 		int lineNum,
 		ref Schematic schematic)
 	{
-		var applicableLines = schematic.Lines
-			.Where(l => Math.Abs(l.LineNum - lineNum) <= 1);
-		var adjacentSymbols = applicableLines
+		var adjacentSymbols = schematic.Lines[lineNum]
+			.GetAdjacentLines(ref schematic)
 			.SelectMany(
 				line => line.Symbols
 					.Where(s => s.Position >= number.Position - 1)
 					.Where(s => s.Position <= number.LastUsedPosition + 1));
 		return adjacentSymbols.Any();
+	}
+
+	public static Number[] GetAdjacentNumbers(
+		this Symbol symbol,
+		int lineNum,
+		ref Schematic schematic)
+	{
+		return schematic.Lines[lineNum]
+			.GetAdjacentLines(ref schematic)
+			.SelectMany(l => l.Numbers)
+			.Where(n => n.LastUsedPosition >= symbol.Position - 1)
+			.Where(n => n.Position <= symbol.Position + 1)
+			.ToArray();
 	}
 
 	public static List<Number> AppendDigit(this List<Number> numbers, Number n)
@@ -115,4 +138,13 @@ public static class Parser
 			$"{last.Value}{n.Value}");
 		return numbers;
 	}
+
+	public static IEnumerable<Line> GetAdjacentLines(
+		this Line line,
+		ref Schematic schematic) => schematic.Lines
+			.Where(l => Math.Abs(l.LineNum - line.LineNum) <= 1);
+
+	public static bool IsGearRatio(this Symbol symbol, int lineNum, ref Schematic schematic) =>
+		symbol.Value == '*'
+		&& symbol.GetAdjacentNumbers(lineNum, ref schematic).Length == 2;
 }

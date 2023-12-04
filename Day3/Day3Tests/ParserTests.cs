@@ -2,6 +2,33 @@ using FluentAssertions;
 
 namespace Day3Tests;
 
+public class GetAdjacentNumbersTests
+{
+	[Theory]
+	[InlineData(1, 3, 467, 35)]
+	[InlineData(4, 3, 617)]
+	[InlineData(8, 5, 755, 598)]
+	public void GetAdjacentNumbers(
+		int lineNum,
+		int position,
+		params int[] expectedValues)
+	{
+		var schematic = Parser.ParseSchematic("gear-ratio.txt");
+		var symbol = schematic.Lines[lineNum]
+			.Symbols
+			.Single(s => s.Position == position);
+
+		var numbers = symbol.GetAdjacentNumbers(lineNum, ref schematic);
+
+		expectedValues.Should()
+			.AllSatisfy(
+				v =>
+					numbers.SingleOrDefault(n => n.Value == v)
+						.Should()
+						.NotBeNull());
+	}
+}
+
 public class HasAdjacentSymbolTests
 {
 	[Theory]
@@ -33,9 +60,10 @@ public class HasAdjacentSymbolTests
 		int position,
 		bool expected)
 	{
-		var schematic = Parser.ParseSchematic("integration.txt");
+		var schematic = Parser.ParseSchematic("has-adjacent-symbol.txt");
 		var number = schematic.Lines[lineNum]
-			.Numbers.Single(n => n.Position == position);
+			.Numbers
+			.Single(n => n.Position == position);
 
 		var hasAdjacentSymbol = number.HasAdjacentSymbol(lineNum, ref schematic);
 
@@ -92,7 +120,8 @@ public class ReadNumbersTests
 				".479........155..............944.....622..............31.........264.......................532..........................254.........528.....",
 				new Number[]
 				{
-					new(479, 1), new(155, 12), new(944, 29), new(622, 37), new(31, 54), new(264, 65), new(532, 91), new(254, 120),
+					new(479, 1), new(155, 12), new(944, 29), new(622, 37), new(31, 54), new(264, 65), new(532, 91),
+					new(254, 120),
 					new(528, 132)
 				}
 			},
