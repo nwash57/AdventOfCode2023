@@ -1,7 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 Console.WriteLine("=== Day 3 Puzzles ===");
-Console.WriteLine("=== Puzzle 1 ===");
 
 var schematic = Parser.ParseSchematic("input.txt");
 
